@@ -1,2 +1,3 @@
-# computer-geometry-system
+# Computer Geometry System
+
 Geometry solver for Numworks calculators.
