@@ -1,0 +1,47 @@
+{
+    "properties": [
+        {
+            "name": "polygon",
+            "type": "defined",
+            "properties": [
+                {
+                    "name": "sides",
+                    "type": "list",
+                    "itemType": "segment",
+                    "length": "numberOfSides"
+                },
+                {
+                    "name": "vertices",
+                    "type": "list",
+                    "itemType": "point",
+                    "length": "numberOfVertices"
+                },
+                {
+                    "name": "regular",
+                    "type": "defined",
+                    "properties": [
+                        {
+                            "name": "exteriorAngle",
+                            "type": "number"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "relations": [
+        {
+            "type": "equal",
+            "propertyA": "polygon.numberOfSides",
+            "propertyB": "polygon.numberOfVertices"
+        },
+        {
+            "type": "equation",
+            "properties": {
+                "a": "polygon.regular.exteriorAngle",
+                "n": "polygon.numberOfSides"
+            },
+            "equation": "a=360/n"
+        }
+    ]
+}
