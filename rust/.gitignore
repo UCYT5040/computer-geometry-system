@@ -7,3 +7,4 @@ package.json
 *.elf
 *.icon
 /icon.png
+.nvim.lua

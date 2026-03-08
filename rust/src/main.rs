@@ -10,8 +10,10 @@ use list::StringList;
 #[cfg(target_os = "none")]
 use alloc::format;
 
-use crate::nadk::display::{COLOR_BLACK, COLOR_WHITE, Color565, SCREEN_RECT, ScreenPoint, draw_string, push_rect_uniform};
-use crate::nadk::keyboard::{InputManager, Key, KeyboardState, wait_until_pressed};
+use crate::nadk::display::{
+    draw_string, push_rect_uniform, Color565, ScreenPoint, COLOR_BLACK, COLOR_WHITE, SCREEN_RECT,
+};
+use crate::nadk::keyboard::{wait_until_pressed, InputManager, Key, KeyboardState};
 use crate::nadk::time;
 use crate::nadk::utils::wait_ok_released;
 
@@ -35,7 +37,7 @@ fn main() {
         COLOR_BLACK,
     );
 
-    let mut menu_list = StringList::new(15, 40, 4);
+    let mut menu_list = StringList::new_with_max_row_count(15, 40);
     menu_list.add("Circle");
     menu_list.add("Polygon");
     menu_list.add("Rectangle");
@@ -54,6 +56,8 @@ fn main() {
         } else if input_man.is_just_pressed(Key::Up) {
             menu_list.previous();
             menu_list.render();
+        } else if input_man.is_just_pressed(Key::Home) {
+            break;
         }
         time::wait_milliseconds(50);
     }

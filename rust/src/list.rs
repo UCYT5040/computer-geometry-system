@@ -4,19 +4,26 @@ use alloc::{string::{String, ToString}, vec::Vec};
 use crate::nadk::display::{COLOR_BLACK, COLOR_WHITE, ScreenPoint, ScreenRect, draw_string, push_rect_uniform};
 
 const ROW_HEIGHT: u16 = 15;
+const SCREEN_WIDTH: u16 = 320;
+const SCREEN_HEIGHT: u16 = 240;
 
 pub struct StringList {
     items: Vec<String>,
     position: u16,
     rows: u16,
     x: u16,
-    y: u16
+    y: u16,
 }
 
 impl StringList {
     /// Creates a new string list
     pub fn new(x: u16, y: u16, rows: u16) -> Self {
         StringList { items: Vec::new(), position: 0, x, y, rows }
+    }
+
+    pub fn new_with_max_row_count(x: u16, y: u16) -> Self {
+        let max_rows = (SCREEN_HEIGHT - y) / ROW_HEIGHT;
+        StringList { items: Vec::new(), position: 0, x, y, rows: max_rows}
     }
 
     /// Adds a new item to the string list
@@ -55,16 +62,14 @@ impl StringList {
     }
 
     pub fn render(&self) {
-        push_rect_uniform(ScreenRect::new(self.x, self.y, 10, self.rows * ROW_HEIGHT), COLOR_BLACK);
+        push_rect_uniform(ScreenRect::new(self.x, self.y, SCREEN_WIDTH - self.x, self.rows * ROW_HEIGHT), COLOR_BLACK);
+        
         self.render_cursor();
 
-        for (i, item_str) in self.items.iter().skip(floor_multiple(self.items.len() as i64, self.position as i64) as usize).take(self.rows as usize).enumerate() {
+        let page = self.position / self.rows;
+
+        for (i, item_str) in self.items.iter().skip((page * self.rows).into()).take(self.rows as usize).enumerate() {
             draw_string(item_str, ScreenPoint::new(self.x + 10, self.y + i as u16 * ROW_HEIGHT), false, COLOR_WHITE, COLOR_BLACK);
         }
     }
-}
-
-fn floor_multiple(n: i64, m: i64) -> i64 {
-    if m == 0 { return 0; }
-    (n / m) * m
 }
