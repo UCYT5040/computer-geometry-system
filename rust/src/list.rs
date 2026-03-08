@@ -40,26 +40,31 @@ impl StringList {
 
     /// Selects the next list item
     pub fn next(&mut self) {
-        self.select(self.position + 1);
+        let _ = self.select(self.position + 1);
     }
 
     // Selects the previous list item
     pub fn previous(&mut self) {
         if self.position < 1 { return; }
 
-        self.select(self.position - 1);
+        let _ = self.select(self.position - 1);
     }
 
     fn render_cursor(&self) {
-        draw_string(">", ScreenPoint::new(self.x, self.y + self.position * ROW_HEIGHT), false, COLOR_WHITE, COLOR_BLACK);
+        draw_string(">", ScreenPoint::new(self.x, self.y + (self.position % self.rows) * ROW_HEIGHT), false, COLOR_WHITE, COLOR_BLACK);
     }
 
     pub fn render(&self) {
         push_rect_uniform(ScreenRect::new(self.x, self.y, 10, self.rows * ROW_HEIGHT), COLOR_BLACK);
         self.render_cursor();
 
-        for (i, item_str) in self.items.iter().enumerate() {
+        for (i, item_str) in self.items.iter().skip(floor_multiple(self.items.len() as i64, self.position as i64) as usize).take(self.rows as usize).enumerate() {
             draw_string(item_str, ScreenPoint::new(self.x + 10, self.y + i as u16 * ROW_HEIGHT), false, COLOR_WHITE, COLOR_BLACK);
         }
     }
+}
+
+fn floor_multiple(n: i64, m: i64) -> i64 {
+    if m == 0 { return 0; }
+    (n / m) * m
 }

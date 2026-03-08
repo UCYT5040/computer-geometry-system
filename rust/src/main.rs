@@ -35,7 +35,7 @@ fn main() {
         COLOR_BLACK,
     );
 
-    let mut menu_list = StringList::new(15, 40, 6);
+    let mut menu_list = StringList::new(15, 40, 4);
     menu_list.add("Circle");
     menu_list.add("Polygon");
     menu_list.add("Rectangle");
