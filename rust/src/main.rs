@@ -11,7 +11,7 @@ use list::StringList;
 use alloc::format;
 
 use crate::nadk::display::{COLOR_BLACK, COLOR_WHITE, Color565, SCREEN_RECT, ScreenPoint, draw_string, push_rect_uniform};
-use crate::nadk::keyboard::{Key, KeyboardState, wait_until_pressed};
+use crate::nadk::keyboard::{InputManager, Key, KeyboardState, wait_until_pressed};
 use crate::nadk::time;
 use crate::nadk::utils::wait_ok_released;
 
@@ -23,7 +23,6 @@ setup_allocator!();
 
 #[unsafe(no_mangle)]
 fn main() {
-    // You must call setup_allocator!() before
     init_heap!();
     wait_ok_released();
 
@@ -36,12 +35,25 @@ fn main() {
         COLOR_BLACK,
     );
 
+    let mut menu_list = StringList::new(15, 40, 6);
+    menu_list.add("Circle");
+    menu_list.add("Polygon");
+    menu_list.add("Rectangle");
+    menu_list.add("Square");
+    menu_list.add("Triangle");
+    menu_list.add("Ellipse");
+    menu_list.render();
+
+    let mut input_man = InputManager::new();
+
     loop {
-        let scan = KeyboardState::scan();
-        if scan.key_down(Key::Down) {
-            draw_string("Pressed Down", ScreenPoint::new(15, 30), false, COLOR_WHITE, COLOR_BLACK);
-        } else if scan.key_down(Key::Up) {
-            draw_string("Pressed Up  ", ScreenPoint::new(15, 30), false, COLOR_WHITE, COLOR_BLACK);
+        input_man.scan();
+        if input_man.is_just_pressed(Key::Down) {
+            menu_list.next();
+            menu_list.render();
+        } else if input_man.is_just_pressed(Key::Up) {
+            menu_list.previous();
+            menu_list.render();
         }
         time::wait_milliseconds(50);
     }
