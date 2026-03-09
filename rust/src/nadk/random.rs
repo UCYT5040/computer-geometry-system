@@ -63,9 +63,7 @@ pub fn get_random_u8() -> u8 {
 
 /// Give a random f32 between 0 and 1.
 pub fn get_random_decimal() -> f32 {
-    unsafe {
-        get_random_u32() as f32 / u32::MAX as f32
-    }
+    unsafe { get_random_u32() as f32 / u32::MAX as f32 }
 }
 
 /// Give a random number between start (included) and end (excluded).

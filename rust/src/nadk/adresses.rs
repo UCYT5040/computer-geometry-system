@@ -8,7 +8,7 @@ pub fn heap_size() -> usize {
 
     #[cfg(feature = "upsilon")]
     {
-        unsafe {_heap_size as usize}
+        unsafe { _heap_size as usize }
     }
 }
 

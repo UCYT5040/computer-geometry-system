@@ -11,7 +11,9 @@ pub fn set_brightness(brightness: u8) {
 #[inline(always)]
 pub fn get_brightness() -> u8 {
     #[cfg(feature = "epsilon")]
-    unsafe { eadk_backlight_brightness() }
+    unsafe {
+        eadk_backlight_brightness()
+    }
 
     #[cfg(feature = "upsilon")]
     0
