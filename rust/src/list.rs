@@ -1,3 +1,5 @@
+#!![allow(unused)]
+
 #[cfg(target_os = "none")]
 use alloc::{string::String, vec::Vec};
 
@@ -16,7 +18,6 @@ pub struct StringList {
 }
 
 impl StringList {
-    #[allow(unused)]
     /// Creates a new string list
     pub fn new(x: u16, y: u16, rows: u16) -> Self {
         StringList { items: Vec::new(), position: 0, x, y, rows }
@@ -88,14 +89,17 @@ impl StringList {
     }
 
     fn render_cursor(&self) {
-        if !self.items.is_empty() {
-            draw_string(">", ScreenPoint::new(self.x, self.y + (self.position % self.rows) * ROW_HEIGHT), false, COLOR_WHITE, COLOR_BLACK);
-        }
+        draw_string(">", ScreenPoint::new(self.x, self.y + (self.position % self.rows) * ROW_HEIGHT), false, COLOR_WHITE, COLOR_BLACK);
     }
 
     pub fn render(&self) {
         push_rect_uniform(ScreenRect::new(self.x, self.y, SCREEN_WIDTH - self.x, self.rows * ROW_HEIGHT), COLOR_BLACK);
         
+        if self.items.is_empty() {
+            draw_string("List is empty", ScreenPoint::new(self.x, self.y), false, COLOR_WHITE, COLOR_BLACK);
+            return;
+        }
+
         self.render_cursor();
 
         let page = self.position / self.rows;
