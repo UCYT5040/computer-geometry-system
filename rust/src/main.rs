@@ -13,7 +13,7 @@ use alloc::format;
 use crate::nadk::display::{
     draw_string, push_rect_uniform, Color565, ScreenPoint, COLOR_BLACK, COLOR_WHITE, SCREEN_RECT,
 };
-use crate::nadk::keyboard::{wait_until_pressed, InputManager, Key, KeyboardState};
+use crate::nadk::keyboard::{InputManager, Key};
 use crate::nadk::time;
 use crate::nadk::utils::wait_ok_released;
 
@@ -55,6 +55,9 @@ fn main() {
             menu_list.render();
         } else if input_man.is_just_pressed(Key::Up) {
             menu_list.previous();
+            menu_list.render();
+        } else if input_man.is_just_pressed(Key::Ok) {
+            menu_list.remove_current();
             menu_list.render();
         } else if input_man.is_just_pressed(Key::Home) {
             break;
