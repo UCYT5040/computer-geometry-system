@@ -1,4 +1,5 @@
 #![cfg_attr(target_os = "none", no_std)]
+//#![no_std]
 #![no_main]
 
 #[macro_use]
@@ -6,6 +7,8 @@ mod nadk;
 
 mod list;
 use list::StringList;
+
+mod tree;
 
 #[cfg(target_os = "none")]
 use alloc::format;

@@ -42,6 +42,7 @@ codegen-units = 1
 cortex-m = {version = "0.7.7", features=["critical-section-single-core"]}
 embedded-alloc = "0.6.0"
 enum-iterator = "2.3.0"
+indextree = { version = "4", default-features = false }
 
 [build-dependencies]
 cc = "1.2.46"

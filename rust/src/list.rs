@@ -10,7 +10,7 @@ const SCREEN_WIDTH: u16 = 320;
 const SCREEN_HEIGHT: u16 = 240;
 
 pub struct StringList {
-    pub items: Vec<String>,
+    items: Vec<String>,
     position: u16,
     rows: u16,
     x: u16,
@@ -94,7 +94,7 @@ impl StringList {
 
     pub fn render(&self) {
         push_rect_uniform(ScreenRect::new(self.x, self.y, SCREEN_WIDTH - self.x, self.rows * ROW_HEIGHT), COLOR_BLACK);
-        
+
         if self.items.is_empty() {
             draw_string("List is empty", ScreenPoint::new(self.x, self.y), false, COLOR_WHITE, COLOR_BLACK);
             return;
