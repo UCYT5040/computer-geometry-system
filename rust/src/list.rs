@@ -1,4 +1,4 @@
-#!![allow(unused)]
+#![allow(unused)]
 
 #[cfg(target_os = "none")]
 use alloc::{string::String, vec::Vec};
@@ -81,7 +81,7 @@ impl StringList {
         let _ = self.select(self.position + 1);
     }
 
-    // Selects the previous list item
+    /// Selects the previous list item
     pub fn previous(&mut self) {
         if self.position < 1 { return; }
 
@@ -92,6 +92,7 @@ impl StringList {
         draw_string(">", ScreenPoint::new(self.x, self.y + (self.position % self.rows) * ROW_HEIGHT), false, COLOR_WHITE, COLOR_BLACK);
     }
 
+    /// Renders the list
     pub fn render(&self) {
         push_rect_uniform(ScreenRect::new(self.x, self.y, SCREEN_WIDTH - self.x, self.rows * ROW_HEIGHT), COLOR_BLACK);
 
