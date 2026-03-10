@@ -13,7 +13,7 @@ use crate::list::StringList;
 use crate::tree::{EquationTree, ItemType};
 
 #[cfg(target_os = "none")]
-use alloc::format;
+use alloc::{collections::btree_set::BTreeSet, format};
 use indextree::NodeId;
 
 use crate::data::add_sample_data;
@@ -72,7 +72,11 @@ fn main() {
                             change_node(&mut menu_list, &mut tree, current_node);
                         }
                         ItemType::Equation => {
-                            draw_string("Clicked on Equation", ScreenPoint::new(15, 200), false, COLOR_WHITE, COLOR_BLACK);
+                            if let Some(equation) = data.data.get_equation() {
+                                let vars = equation.get_variables();
+                                let vars_str = format!("Variables: {:?}", vars);
+                                draw_string(vars_str.as_str(), ScreenPoint::new(15, 200), false, COLOR_WHITE, COLOR_BLACK);
+                            }
                         }
                         _ => {}
                     }

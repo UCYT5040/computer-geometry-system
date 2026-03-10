@@ -22,7 +22,7 @@ pub struct ItemData {
 pub struct TreeItem {
     pub name: String,
     pub item_type: ItemType,
-    data: ItemData,
+    pub data: ItemData,
 }
 
 pub struct EquationTree {
@@ -76,11 +76,19 @@ impl TreeItem {
         }
     }
 
-    pub fn new_equation_with_name(name: impl Into<String>) -> Self {
+    pub fn new_equation_with_name(name: impl Into<String>, equation: &str) -> Self {
+        let mut data = ItemData::default();
+        data.data_equation = Equation::new(equation).ok();
         TreeItem {
             name: name.into(),
             item_type: ItemType::Equation,
-            data: ItemData::default(),
+            data
         }
+    }
+}
+
+impl ItemData {
+    pub fn get_equation(&self) -> Option<Equation> {
+        return self.data_equation.clone();
     }
 }
