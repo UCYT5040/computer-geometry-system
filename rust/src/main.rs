@@ -7,6 +7,7 @@ mod nadk;
 mod list;
 mod data;
 mod tree;
+mod equation;
 
 use crate::list::StringList;
 use crate::tree::{EquationTree, ItemType};

@@ -5,15 +5,12 @@ use alloc::{string::String, vec::Vec};
 
 use indextree::{Arena, NodeId};
 
+use crate::equation::Equation;
+
 pub enum ItemType {
     Category,
     Equation,
     Root,
-}
-
-pub struct Equation {
-    inputs: String,
-    outputs: String,
 }
 
 #[derive(Default)]
