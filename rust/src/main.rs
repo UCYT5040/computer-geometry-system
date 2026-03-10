@@ -12,7 +12,7 @@ use crate::list::StringList;
 use crate::tree::{EquationTree, ItemType};
 
 #[cfg(target_os = "none")]
-use alloc::{format, string::String, vec::Vec};
+use alloc::format;
 use indextree::NodeId;
 
 use crate::data::add_sample_data;
