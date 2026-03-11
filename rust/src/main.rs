@@ -9,16 +9,21 @@ mod data;
 mod tree;
 mod equation;
 
-use crate::list::StringList;
+use crate::list::{SCREEN_WIDTH, StringList};
 use crate::tree::{EquationTree, ItemType};
 
 #[cfg(target_os = "none")]
-use alloc::{collections::btree_set::BTreeSet, format};
+use alloc::{collections::btree_set::BTreeSet, format, string::{String, ToString}};
+#[cfg(not(target_os = "none"))]
+use std::collections::BTreeSet;
+
 use indextree::NodeId;
+use mathcore_nostd::{Expr, MathCore};
+use mathcore_nostd::engine::Engine;
 
 use crate::data::add_sample_data;
 use crate::nadk::display::{
-    COLOR_BLACK, COLOR_WHITE, Color565, SCREEN_RECT, ScreenPoint, draw_string, push_rect_uniform,
+    COLOR_BLACK, COLOR_WHITE, Color565, SCREEN_RECT, ScreenPoint, ScreenRect, draw_string, push_rect_uniform
 };
 use crate::nadk::keyboard::{InputManager, Key};
 use crate::nadk::time;
@@ -64,22 +69,48 @@ fn main() {
         } else if input_man.is_just_pressed(Key::Ok) {
             if let Some(item) = menu_list.get_selected()
                 && let Some(item_id) = item.id
+                && let Some(data) = tree.get_data(item_id)
             {
-                if let Some(data) = tree.get_data(item_id) {
-                    match data.item_type {
-                        ItemType::Category => {
-                            current_node = item_id;
-                            change_node(&mut menu_list, &mut tree, current_node);
-                        }
-                        ItemType::Equation => {
-                            if let Some(equation) = data.data.get_equation() {
-                                let vars = equation.get_variables();
-                                let vars_str = format!("Variables: {:?}", vars);
-                                draw_string(vars_str.as_str(), ScreenPoint::new(15, 200), false, COLOR_WHITE, COLOR_BLACK);
+                match data.item_type {
+                    ItemType::Category => {
+                        current_node = item_id;
+                        change_node(&mut menu_list, &mut tree, current_node);
+                    }
+                    ItemType::Equation => {
+                        if let Some(equation) = data.data.get_equation() {
+                            let mut vars = equation.get_variables();
+                            if let Some(out) = select_var(&vars, &mut input_man) {
+                                let math = MathCore::new();
+                                let engine = Engine::new();
+                                vars.remove(&out);
+                                let mut expr = equation.data;
+                                for var in &vars {
+                                    let res = input_number_for(var, &mut input_man, &math);
+                                    expr = engine.substitute(&expr, var, &res).unwrap_or(expr);
+                                }
+
+                                let res: String;
+                                match MathCore::solve(expr.to_string().as_str(), &out) {
+                                    Ok(r) => {
+                                        if r.is_empty() {
+                                            res = "No results".to_string();
+                                        } else if r.len() == 1 {
+                                            res = r[0].to_string();
+                                        } else {
+                                            res = format!("{:?}", r);
+                                        }
+                                    },
+                                    Err(e) => {
+                                        res = e.to_string();
+                                    }
+                                }
+
+                                push_rect_uniform(ScreenRect::new(15, 200, SCREEN_WIDTH - 15, 15), COLOR_BLACK);
+                                draw_string(res.as_str(), ScreenPoint::new(15, 200), false, COLOR_WHITE, COLOR_BLACK);
                             }
                         }
-                        _ => {}
                     }
+                    _ => {}
                 }
             }
         } else if input_man.is_just_pressed(Key::Back) {
@@ -96,6 +127,68 @@ fn main() {
             break;
         }
         time::wait_milliseconds(50);
+    }
+}
+
+fn select_var(vars: &BTreeSet<String>, input_man: &mut InputManager) -> Option<String> {
+    if vars.is_empty() { return None; }
+    draw_string("Select desired output", ScreenPoint::new(15, 40), false, COLOR_WHITE, COLOR_BLACK);
+    let mut list = StringList::new_with_max_row_count(15, 55);
+    list.clear_screen();
+    for var in vars {
+        list.add(var);
+    }
+    list.render();
+    loop {
+        input_man.scan();
+        if input_man.is_just_pressed(Key::Down) {
+            list.next();
+            list.render();
+        } else if input_man.is_just_pressed(Key::Up) {
+            list.previous();
+            list.render();
+        } else if input_man.is_just_pressed(Key::Ok) {
+            list.clear_screen();
+            return list.get_selected().and_then(|i| Some(i.name));
+        }
+        time::wait_milliseconds(50);
+    }
+}
+
+fn input_number_for(var: &str, input_man: &mut InputManager, math: &MathCore) -> Expr {
+    push_rect_uniform(ScreenRect::new(15, 40, SCREEN_WIDTH - 15, 15 * 2), COLOR_BLACK);
+    draw_string(format!("Input variable for {}:", var).as_str(), ScreenPoint::new(15, 40), false, COLOR_WHITE, COLOR_BLACK);
+    let mut res = String::new();
+    loop {
+        input_man.scan();
+        if let Some(last_pressed) = input_man.get_last_pressed() {
+            match last_pressed.get_matching_char(false, false) {
+                Some(ch) => {
+                    res.push(ch);
+                },
+                None => {
+                    match last_pressed {
+                        Key::Backspace => { res.pop(); },
+                        Key::Ok => break,
+                        _ => {}
+                    }
+                }
+            }
+            push_rect_uniform(ScreenRect::new(15, 55, SCREEN_WIDTH - 15, 15), COLOR_BLACK);
+            draw_string(res.as_str(), ScreenPoint::new(15, 55), false, COLOR_WHITE, COLOR_BLACK);
+        }
+        time::wait_milliseconds(20);
+    }
+    let resm = math.evaluate(&res);
+    match resm {
+        Ok(expr) => {
+            return expr;
+        }
+        Err(e) => {
+            push_rect_uniform(ScreenRect::new(15, 200, SCREEN_WIDTH - 15, 15), COLOR_BLACK);
+            draw_string(format!("{}", e).as_str(), ScreenPoint::new(15, 200), false, COLOR_WHITE, COLOR_BLACK);
+            return input_number_for(var, input_man, math);
+        }
     }
 }
 

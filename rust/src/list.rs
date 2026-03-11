@@ -13,8 +13,8 @@ use crate::{
 };
 
 const ROW_HEIGHT: u16 = 15;
-const SCREEN_WIDTH: u16 = 320;
-const SCREEN_HEIGHT: u16 = 240;
+pub const SCREEN_WIDTH: u16 = 320;
+pub const SCREEN_HEIGHT: u16 = 240;
 
 #[derive(Clone)]
 pub struct ListItem {
@@ -155,8 +155,7 @@ impl StringList {
         );
     }
 
-    /// Renders the list
-    pub fn render(&self) {
+    pub fn clear_screen(&self) {
         push_rect_uniform(
             ScreenRect::new(
                 self.x,
@@ -166,6 +165,11 @@ impl StringList {
             ),
             COLOR_BLACK,
         );
+    }
+
+    /// Renders the list
+    pub fn render(&self) {
+        self.clear_screen();
 
         if self.items.is_empty() {
             draw_string(

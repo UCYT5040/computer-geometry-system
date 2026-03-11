@@ -8,7 +8,7 @@ use std::collections::BTreeSet;
 
 #[derive(Clone)]
 pub struct Equation {
-    data: Expr
+    pub data: Expr
 }
 
 impl Equation {
