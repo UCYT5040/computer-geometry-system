@@ -6,6 +6,27 @@ from json import load as json_load
 properties_registry = {}
 
 
+class RelationsRegistry:
+    relations_registry = {} # RID: ...
+    property_relations = {} # property.path: RID
+
+    def add_relation(self, relation):
+        rid = len(self.relations_registry)
+        self.relations_registry[rid] = relation
+        relation_properties = []
+        if relation["type"] in ["equal", "notEqual"]:
+            relation_properties = [relation["propertyA"], relation["propertyB"]]
+        elif relation["type"] in ["implies", "notImplies"]:
+            relation_properties = [relation["propertyA"]]
+        elif relation["type"] == "equation":
+            relation_properties = list(relation["properties"].values())
+        elif relation["type"] == "expression":
+            relation_properties = [relation["output"]]
+        for prop in relation_properties:
+            self.property_relations[prop] = rid
+
+relations_registry = RelationsRegistry()
+
 def load_properties(properties: list, path: List[str] = []):
     global properties_registry
     for prop in properties:
@@ -16,7 +37,7 @@ def load_properties(properties: list, path: List[str] = []):
         if prop["type"] == "defined" and "properties" in prop:
             load_properties(prop["properties"], prop_path)
         elif prop["type"] == "list" and "length" in prop:
-            # Special lenth property
+            # Special length property
             properties_registry[f"{'.'.join(path)}.{prop['length']}"] = {
                 "type": "number"
             }
@@ -24,6 +45,12 @@ def load_properties(properties: list, path: List[str] = []):
             # TODO: Add relationship between the list and the length property
 
         properties_registry[prop_path_str] = prop_data
+
+
+def load_relations(relations: list):
+    global relations_registry
+    for relation in relations:
+        relations_registry.add_relation(relation)
 
 
 def load_method(method):
