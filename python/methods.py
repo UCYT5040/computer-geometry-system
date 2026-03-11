@@ -37,7 +37,7 @@ def load_properties(properties: list, path: List[str] = []):
         if prop["type"] == "defined" and "properties" in prop:
             load_properties(prop["properties"], prop_path)
         elif prop["type"] == "list" and "length" in prop:
-            # Special lenth property
+            # Special length property
             properties_registry[f"{'.'.join(path)}.{prop['length']}"] = {
                 "type": "number"
             }
