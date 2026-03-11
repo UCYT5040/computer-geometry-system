@@ -1,3 +1,6 @@
+#[cfg(target_os = "none")]
+use alloc::vec::Vec;
+
 use enum_iterator::Sequence;
 
 use crate::nadk::time;
@@ -268,6 +271,19 @@ pub fn wait_until_pressed(key: Key) {
         let scan = KeyboardState::scan();
         if scan.key_down(key) {
             break;
+        }
+        time::wait_milliseconds(50);
+    }
+}
+
+pub fn wait_until_pressed_multiple(keys: Vec<Key>) {
+    let mut running = true;
+    while running {
+        let scan = KeyboardState::scan();
+        for key in keys.iter() {
+            if scan.key_down(*key) {
+                running = false;
+            }
         }
         time::wait_milliseconds(50);
     }

@@ -15,10 +15,7 @@ pub fn add_sample_data(tree: &mut EquationTree) {
         tree.add_child(circle_id, TreeItem::new_equation_with_name("Circumference", "C = 2 * pi * r"));
 
     // Add children to Polygon
-    let _sides_id = tree.add_child(
-        polygon_id,
-        TreeItem::new_equation_with_name("Number of Sides", "n"),
-    );
+    let _angles_id = tree.add_child(polygon_id, TreeItem::new_equation_with_name("Exterior Angles", "a = 360 / n"));
 
     // Add children to Rectangle
     let _width_id = tree.add_child(rectangle_id, TreeItem::new_equation_with_name("Width", "w"));
