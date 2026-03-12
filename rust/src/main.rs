@@ -8,7 +8,9 @@ mod list;
 mod data;
 mod tree;
 mod equation;
+mod editor;
 
+use crate::editor::TextEditor;
 use crate::list::{SCREEN_WIDTH, StringList};
 use crate::tree::{EquationTree, ItemType, TreeItem};
 
@@ -57,6 +59,10 @@ fn main() {
 
     let mut current_node = tree.root;
     change_node(&mut menu_list, &mut tree, current_node);
+
+    /*let mut textinput = TextEditor::new();
+    let content = textinput.start(&mut input_man);
+    return;*/
 
     loop {
         input_man.scan();
