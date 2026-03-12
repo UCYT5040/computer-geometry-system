@@ -1,7 +1,11 @@
 #[cfg(target_os = "none")]
-use alloc::string::String;
+use alloc::{string::String, format};
 
-use crate::{list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_WHITE, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}}};
+use crate::{list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_WHITE, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}, time}};
+
+const ROW_LENGTH: usize = 44;
+const ROW_HEIGHT: usize = 15;
+const EDITOR_START: u16 = 18;
 
 pub struct TextEditor {
     content: String,
@@ -17,13 +21,55 @@ impl TextEditor {
     pub fn start(&mut self, input_man: &mut InputManager) -> String {
         self.clear_screen();
         self.render_button_states();
+        self.render_top_bar();
         loop {
             input_man.scan();
             if input_man.is_just_pressed(Key::Shift) { self.shift_pressed = !self.shift_pressed; self.render_button_states(); }
             if input_man.is_just_pressed(Key::Alpha) { self.alpha_pressed = !self.alpha_pressed; self.render_button_states(); }
+            if input_man.is_just_pressed(Key::Backspace) { self.content.pop(); self.render_content(); }
             if input_man.is_just_pressed(Key::Back) { break; }
+            if let Some(key) = input_man.get_last_pressed() {
+                self.handle_keypress(key);
+            }
+            time::wait_milliseconds(20);
         }
         return self.content.clone();
+    }
+
+    fn handle_keypress(&mut self, key: Key) {
+        if let Some(c) = key.get_matching_char(self.shift_pressed, self.alpha_pressed) {
+            self.content.push(c);
+            self.render_content();
+            self.render_top_bar();
+        }
+    }
+
+    fn render_content(&self) {
+        push_rect_uniform(ScreenRect::new(0, EDITOR_START, SCREEN_WIDTH, SCREEN_HEIGHT - EDITOR_START), COLOR_BLACK);
+
+        let mut row = 0;
+        let mut current_row = String::new();
+
+        for c in self.content.chars() {
+            if current_row.len() < ROW_LENGTH && c != '\n' {
+                current_row.push(c);
+            } else {
+                draw_string(&current_row, ScreenPoint::new(0, (row * ROW_HEIGHT) as u16 + EDITOR_START), false, COLOR_WHITE, COLOR_BLACK);
+                row += 1;
+                current_row.clear();
+            }
+        }
+        if !current_row.is_empty() {
+            draw_string(&current_row, ScreenPoint::new(0, (row * ROW_HEIGHT) as u16 + EDITOR_START), false, COLOR_WHITE, COLOR_BLACK);
+        }
+    }
+
+    fn render_top_bar(&self) {
+        push_rect_uniform(ScreenRect::new(0, 14, SCREEN_WIDTH, 1), COLOR_WHITE);
+        let chars_str = format!("{} chars", self.content.len());
+        let chars_str_x = SCREEN_WIDTH.saturating_sub((chars_str.len() * 8 - 2).try_into().unwrap());
+        push_rect_uniform(ScreenRect::new(chars_str_x, 0, SCREEN_WIDTH - chars_str_x, 14), COLOR_BLACK);
+        draw_string(chars_str.as_str(), ScreenPoint::new(chars_str_x, 0), false, COLOR_WHITE, COLOR_BLACK);
     }
 
     fn render_button_states(&self) {
