@@ -133,8 +133,4 @@ impl BWColor {
         }
         self.color
     }
-
-    fn get(&self) -> Color565 {
-        self.color
-    }
 }
