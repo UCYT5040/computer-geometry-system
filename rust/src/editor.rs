@@ -54,9 +54,9 @@ impl TextEditor {
     }
 
     fn render_cursor(&self, color: Color565) {
-        let cursor_x = (self.cursor.pos % ROW_LENGTH) * 7 + 1;
+        let cursor_x = (self.cursor.pos % ROW_LENGTH) * 7 - 1;
         let cursor_y = (self.cursor.pos / ROW_LENGTH) * ROW_HEIGHT + EDITOR_START as usize;
-        push_rect_uniform(ScreenRect::new(cursor_x as u16, cursor_y as u16, 2, 13), color);
+        push_rect_uniform(ScreenRect::new(cursor_x as u16, cursor_y as u16, 1, 12), color);
     }
 
     fn handle_keypress(&mut self, key: Key) {
@@ -64,9 +64,18 @@ impl TextEditor {
             self.content.push(c);
             self.cursor.pos += 1;
         } else {
-            if key == Key::Backspace {
-                self.content.pop();
-                self.cursor.pos = self.cursor.pos.saturating_sub(1);
+            match key {
+                Key::Backspace => {
+                    self.content.pop();
+                    self.cursor.pos = self.cursor.pos.saturating_sub(1);
+                },
+                Key::Left => {
+                    self.cursor.pos = self.cursor.pos.saturating_sub(1);
+                },
+                Key::Right => {
+                    self.cursor.pos = (self.cursor.pos + 1).min(self.content.len());
+                },
+                _ => {}
             }
         }
         self.render_content();
