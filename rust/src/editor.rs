@@ -96,9 +96,9 @@ impl TextEditor {
 
     fn render_top_bar(&self) {
         push_rect_uniform(ScreenRect::new(0, 14, SCREEN_WIDTH, 1), COLOR_WHITE);
-        let chars_str = format!("{} chars", self.content.len());
-        let chars_str_x = SCREEN_WIDTH.saturating_sub((chars_str.len() * 8 - 2).try_into().unwrap());
-        push_rect_uniform(ScreenRect::new(chars_str_x, 0, SCREEN_WIDTH - chars_str_x, 14), COLOR_BLACK);
+        let chars_str = format!("{} {}", self.content.len(), if self.content.len() == 1 { "char" } else { "chars" });
+        let chars_str_x = SCREEN_WIDTH.saturating_sub((chars_str.len() * 7 - 2).try_into().unwrap()) - 7;
+        push_rect_uniform(ScreenRect::new(chars_str_x.saturating_sub(20), 0, SCREEN_WIDTH - chars_str_x + 20, 14), COLOR_BLACK);
         draw_string(chars_str.as_str(), ScreenPoint::new(chars_str_x, 0), false, COLOR_WHITE, COLOR_BLACK);
     }
 
