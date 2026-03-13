@@ -1,9 +1,9 @@
 #[cfg(target_os = "none")]
 use alloc::{string::String, format};
 
-use crate::{list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_WHITE, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}, time}};
+use crate::{list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_RED, COLOR_WHITE, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}, time}};
 
-const ROW_LENGTH: usize = 44;
+const ROW_LENGTH: usize = 45;
 const ROW_HEIGHT: usize = 15;
 const EDITOR_START: u16 = 18;
 
@@ -22,6 +22,7 @@ impl TextEditor {
         self.clear_screen();
         self.render_button_states();
         self.render_top_bar();
+        self.render_cursor();
         loop {
             input_man.scan();
             if input_man.is_just_pressed(Key::Shift) { self.shift_pressed = !self.shift_pressed; self.render_button_states(); }
@@ -36,11 +37,18 @@ impl TextEditor {
         return self.content.clone();
     }
 
+    fn render_cursor(&self) {
+        let cursor_x = (self.content.len() % ROW_LENGTH) * 7 + 1;
+        let cursor_y = ((self.content.len()) / ROW_LENGTH) * ROW_HEIGHT + EDITOR_START as usize;
+        push_rect_uniform(ScreenRect::new(cursor_x as u16, cursor_y as u16, 2, 13), COLOR_WHITE);
+    }
+
     fn handle_keypress(&mut self, key: Key) {
         if let Some(c) = key.get_matching_char(self.shift_pressed, self.alpha_pressed) {
             self.content.push(c);
             self.render_content();
             self.render_top_bar();
+            self.render_cursor();
         }
     }
 
@@ -51,9 +59,8 @@ impl TextEditor {
         let mut current_row = String::new();
 
         for c in self.content.chars() {
-            if current_row.len() < ROW_LENGTH && c != '\n' {
-                current_row.push(c);
-            } else {
+            if c != '\n' { current_row.push(c); }
+            if current_row.len() >= ROW_LENGTH || c == '\n' {
                 draw_string(&current_row, ScreenPoint::new(0, (row * ROW_HEIGHT) as u16 + EDITOR_START), false, COLOR_WHITE, COLOR_BLACK);
                 row += 1;
                 current_row.clear();
