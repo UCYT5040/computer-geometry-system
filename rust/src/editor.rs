@@ -1,55 +1,78 @@
 #[cfg(target_os = "none")]
 use alloc::{string::String, format};
 
-use crate::{list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_RED, COLOR_WHITE, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}, time}};
+use crate::{list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_RED, COLOR_WHITE, Color565, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}, time}};
 
 const ROW_LENGTH: usize = 45;
 const ROW_HEIGHT: usize = 15;
 const EDITOR_START: u16 = 18;
 
+struct BWColor {
+    color: Color565
+}
+
+#[derive(Default)]
+struct TextCursor {
+    pos: usize,
+    color: BWColor
+}
+
 pub struct TextEditor {
     content: String,
     shift_pressed: bool,
-    alpha_pressed: bool
+    alpha_pressed: bool,
+    time: u64,
+    cursor: TextCursor
 }
 
 impl TextEditor {
     pub fn new() -> Self {
-        return TextEditor { content: String::new(), shift_pressed: false, alpha_pressed: false }
+        return TextEditor { content: String::new(), shift_pressed: false, alpha_pressed: false, time: 0, cursor: TextCursor::default() }
     }
 
     pub fn start(&mut self, input_man: &mut InputManager) -> String {
         self.clear_screen();
         self.render_button_states();
         self.render_top_bar();
-        self.render_cursor();
+        self.render_cursor(COLOR_WHITE);
         loop {
             input_man.scan();
             if input_man.is_just_pressed(Key::Shift) { self.shift_pressed = !self.shift_pressed; self.render_button_states(); }
             if input_man.is_just_pressed(Key::Alpha) { self.alpha_pressed = !self.alpha_pressed; self.render_button_states(); }
-            if input_man.is_just_pressed(Key::Backspace) { self.content.pop(); self.render_content(); }
             if input_man.is_just_pressed(Key::Back) { break; }
             if let Some(key) = input_man.get_last_pressed() {
                 self.handle_keypress(key);
             }
             time::wait_milliseconds(20);
+            self.time += 20;
+            if self.time.is_multiple_of(600) {
+                let cursor_color = self.cursor.color.invert();
+                self.render_cursor(cursor_color);
+            }
         }
         return self.content.clone();
     }
 
-    fn render_cursor(&self) {
-        let cursor_x = (self.content.len() % ROW_LENGTH) * 7 + 1;
-        let cursor_y = ((self.content.len()) / ROW_LENGTH) * ROW_HEIGHT + EDITOR_START as usize;
-        push_rect_uniform(ScreenRect::new(cursor_x as u16, cursor_y as u16, 2, 13), COLOR_WHITE);
+    fn render_cursor(&self, color: Color565) {
+        let cursor_x = (self.cursor.pos % ROW_LENGTH) * 7 + 1;
+        let cursor_y = (self.cursor.pos / ROW_LENGTH) * ROW_HEIGHT + EDITOR_START as usize;
+        push_rect_uniform(ScreenRect::new(cursor_x as u16, cursor_y as u16, 2, 13), color);
     }
 
     fn handle_keypress(&mut self, key: Key) {
         if let Some(c) = key.get_matching_char(self.shift_pressed, self.alpha_pressed) {
             self.content.push(c);
-            self.render_content();
-            self.render_top_bar();
-            self.render_cursor();
+            self.cursor.pos += 1;
+        } else {
+            if key == Key::Backspace {
+                self.content.pop();
+                self.cursor.pos = self.cursor.pos.saturating_sub(1);
+            }
         }
+        self.render_content();
+        self.render_top_bar();
+        self.render_cursor(COLOR_WHITE);
+        self.time = 0;
     }
 
     fn render_content(&self) {
@@ -92,5 +115,26 @@ impl TextEditor {
 
     fn clear_screen(&self) {
         push_rect_uniform(ScreenRect::new(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), COLOR_BLACK);
+    }
+}
+
+impl Default for BWColor {
+    fn default() -> Self {
+        BWColor { color: COLOR_WHITE }
+    }
+}
+
+impl BWColor {
+    fn invert(&mut self) -> Color565 {
+        if self.color == COLOR_WHITE {
+            self.color = COLOR_BLACK;
+        } else if self.color == COLOR_BLACK {
+            self.color = COLOR_WHITE;
+        }
+        self.color
+    }
+
+    fn get(&self) -> Color565 {
+        self.color
     }
 }
