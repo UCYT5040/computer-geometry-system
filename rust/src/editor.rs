@@ -1,7 +1,7 @@
 #[cfg(target_os = "none")]
-use alloc::{string::String, format};
+use alloc::{string::{String, ToString}, format};
 
-use crate::{list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_RED, COLOR_WHITE, Color565, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}, time}};
+use crate::{list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_WHITE, Color565, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}, time}};
 
 const ROW_LENGTH: usize = 45;
 const ROW_HEIGHT: usize = 15;
@@ -61,12 +61,14 @@ impl TextEditor {
 
     fn handle_keypress(&mut self, key: Key) {
         if let Some(c) = key.get_matching_char(self.shift_pressed, self.alpha_pressed) {
-            self.content.push(c);
+            self.content.insert_str(self.cursor.pos, c.to_string().as_str());
             self.cursor.pos += 1;
         } else {
             match key {
                 Key::Backspace => {
-                    self.content.pop();
+                    if self.cursor.pos > 0 {
+                        self.content.remove(self.cursor.pos - 1);    
+                    }
                     self.cursor.pos = self.cursor.pos.saturating_sub(1);
                 },
                 Key::Left => {
