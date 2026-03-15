@@ -1,5 +1,5 @@
 #[cfg(target_os = "none")]
-use alloc::{string::{String, ToString}, format, vec::Vec};
+use alloc::{string::String, format, vec::Vec};
 
 use crate::{list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_WHITE, Color565, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}, time}};
 
@@ -44,7 +44,7 @@ impl TextEditor {
             input_man.scan();
             if input_man.is_just_pressed(Key::Shift) { self.shift_pressed = !self.shift_pressed; self.render_button_states(); }
             if input_man.is_just_pressed(Key::Alpha) { self.alpha_pressed = !self.alpha_pressed; self.render_button_states(); }
-            if input_man.is_just_pressed(Key::Back) { break; }
+            if input_man.is_just_pressed(Key::Back) || input_man.is_just_pressed(Key::Exe) { break; }
             if let Some(key) = input_man.get_last_pressed() {
                 self.handle_keypress(key);
             }
@@ -73,15 +73,31 @@ impl TextEditor {
                 Key::Backspace => {
                     if self.cursor.pos > 0 {
                         self.content.remove(self.cursor.row, self.cursor.pos - 1);
+                        self.cursor.pos -= 1;
+                    } else {
+                        let old_row = self.content.remove_row(self.cursor.row);
+                        self.cursor.row = self.cursor.row.saturating_sub(1);
+                        self.cursor.pos = self.content.row_len(self.cursor.row);
+                        self.content.row_append(self.cursor.row, &old_row);
                     }
-                    self.cursor.pos = self.cursor.pos.saturating_sub(1);
                 },
                 Key::Left => {
                     self.cursor.pos = self.cursor.pos.saturating_sub(1);
                 },
                 Key::Right => {
-                    self.cursor.pos = (self.cursor.pos + 1).min(self.content.len());
+                    self.cursor.pos = (self.cursor.pos + 1).min(self.content.row_len(self.cursor.row));
                 },
+                Key::Up => {
+                    self.cursor.row = self.cursor.row.saturating_sub(1);
+                    self.cursor.pos = self.cursor.pos.min(self.content.row_len(self.cursor.row));
+                },
+                Key::Down => {
+                    let new_row = self.cursor.row + 1;
+                    if self.content.row_exists(new_row) {
+                        self.cursor.row += 1;
+                        self.cursor.pos = self.cursor.pos.min(self.content.row_len(self.cursor.row));
+                    }
+                }
                 Key::Ans => {
                     self.content.insert_row(self.cursor.row + 1, String::new());
                     self.cursor.row += 1;
@@ -152,11 +168,18 @@ impl TextContent {
         length
     }
 
+    fn row_len(&self, row: usize) -> usize {
+        self.rows.get(row).and_then(|r| Some(r.len())).unwrap_or(0)
+    }
+
+    fn row_exists(&self, row: usize) -> bool {
+        row < self.rows.len()
+    }
+
     fn get(&self) -> String {
         return self.rows.join("\n");
     }
 
-    #[allow(clippy::similar_names)]
     fn insert(&mut self, row: usize, pos: usize, ch: char) {
         if row >= self.rows.len() {
             self.rows.resize(row + 1, String::new());
@@ -168,10 +191,20 @@ impl TextContent {
         self.rows.insert(row, content);
     }
 
+    fn row_append(&mut self, row: usize, content: &str) {
+        if row < self.rows.len() {
+            self.rows[row].push_str(content);
+        }
+    }
+
     fn remove(&mut self, row: usize, pos: usize) {
         if row < self.rows.len() {
             self.rows[row].remove(pos);
         }
+    }
+
+    fn remove_row(&mut self, row: usize) -> String {
+        self.rows.remove(row)
     }
 }
 

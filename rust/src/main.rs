@@ -60,9 +60,9 @@ fn main() {
     let mut current_node = tree.root;
     change_node(&mut menu_list, &mut tree, current_node);
 
+    // this is here for testing purposes
     let mut textinput = TextEditor::new();
     let content = textinput.start(&mut input_man);
-    return;
 
     loop {
         input_man.scan();
