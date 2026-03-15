@@ -1,5 +1,5 @@
 #[cfg(target_os = "none")]
-use alloc::{string::String, format, vec::Vec};
+use alloc::{string::String, string, format, vec::Vec};
 
 use crate::{list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_WHITE, Color565, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}, time}};
 
@@ -60,7 +60,7 @@ impl TextEditor {
 
     fn render_cursor(&self, color: Color565) {
         let cursor_x = ((self.cursor.pos % ROW_LENGTH) * 7).saturating_sub(1);
-        let cursor_y = self.cursor.row * ROW_HEIGHT + EDITOR_START as usize;
+        let cursor_y = self.content.get_row_depth(self.cursor.row, self.cursor.pos) * ROW_HEIGHT + EDITOR_START as usize;
         push_rect_uniform(ScreenRect::new(cursor_x as u16, cursor_y as u16, 1, 12), color);
     }
 
@@ -205,6 +205,16 @@ impl TextContent {
 
     fn remove_row(&mut self, row: usize) -> String {
         self.rows.remove(row)
+    }
+
+    fn get_row_depth(&self, row: usize, pos: usize) -> usize {
+        let mut rows: Vec<String> = self.rows.clone();
+        rows.drain(..row);
+        let depth: usize = self.rows[..row].iter()
+            .flat_map(|s| s.lines())
+            .flat_map(|s| s.as_bytes().chunks(ROW_LENGTH).map(|c| String::from_utf8(c.to_vec()).unwrap()))
+            .count();
+        depth + pos / ROW_LENGTH
     }
 }
 
