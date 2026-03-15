@@ -19,11 +19,11 @@ struct TextCursor {
 }
 
 struct TextContent {
-    lines: Vec<String>
+    rows: Vec<String>
 }
 
 pub struct TextEditor {
-    content: String,
+    content: TextContent,
     shift_pressed: bool,
     alpha_pressed: bool,
     time: u64,
@@ -32,7 +32,7 @@ pub struct TextEditor {
 
 impl TextEditor {
     pub fn new() -> Self {
-        return TextEditor { content: String::new(), shift_pressed: false, alpha_pressed: false, time: 0, cursor: TextCursor::default() }
+        return TextEditor { content: TextContent::new(), shift_pressed: false, alpha_pressed: false, time: 0, cursor: TextCursor::default() }
     }
 
     pub fn start(&mut self, input_man: &mut InputManager) -> String {
@@ -55,24 +55,24 @@ impl TextEditor {
                 self.render_cursor(cursor_color);
             }
         }
-        return self.content.clone();
+        return self.content.get();
     }
 
     fn render_cursor(&self, color: Color565) {
-        let cursor_x = (self.cursor.pos % ROW_LENGTH) * 7 - 1;
-        let cursor_y = (self.cursor.pos / ROW_LENGTH) * ROW_HEIGHT + EDITOR_START as usize;
+        let cursor_x = ((self.cursor.pos % ROW_LENGTH) * 7).saturating_sub(1);
+        let cursor_y = self.cursor.row * ROW_HEIGHT + EDITOR_START as usize;
         push_rect_uniform(ScreenRect::new(cursor_x as u16, cursor_y as u16, 1, 12), color);
     }
 
     fn handle_keypress(&mut self, key: Key) {
         if let Some(c) = key.get_matching_char(self.shift_pressed, self.alpha_pressed) {
-            self.content.insert_str(self.cursor.pos, c.to_string().as_str());
+            self.content.insert(self.cursor.row, self.cursor.pos, c);
             self.cursor.pos += 1;
         } else {
             match key {
                 Key::Backspace => {
                     if self.cursor.pos > 0 {
-                        self.content.remove(self.cursor.pos - 1);    
+                        self.content.remove(self.cursor.row, self.cursor.pos - 1);
                     }
                     self.cursor.pos = self.cursor.pos.saturating_sub(1);
                 },
@@ -82,6 +82,11 @@ impl TextEditor {
                 Key::Right => {
                     self.cursor.pos = (self.cursor.pos + 1).min(self.content.len());
                 },
+                Key::Ans => {
+                    self.content.insert_row(self.cursor.row + 1, String::new());
+                    self.cursor.row += 1;
+                    self.cursor.pos = 0;
+                }
                 _ => {}
             }
         }
@@ -97,7 +102,7 @@ impl TextEditor {
         let mut row = 0;
         let mut current_row = String::new();
 
-        for c in self.content.chars() {
+        for c in self.content.get().chars() {
             if c != '\n' { current_row.push(c); }
             if current_row.len() >= ROW_LENGTH || c == '\n' {
                 draw_string(&current_row, ScreenPoint::new(0, (row * ROW_HEIGHT) as u16 + EDITOR_START), false, COLOR_WHITE, COLOR_BLACK);
@@ -131,6 +136,42 @@ impl TextEditor {
 
     fn clear_screen(&self) {
         push_rect_uniform(ScreenRect::new(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), COLOR_BLACK);
+    }
+}
+
+impl TextContent {
+    fn new() -> Self {
+        TextContent { rows: Vec::new() }
+    }
+
+    fn len(&self) -> usize {
+        let mut length = 0;
+        for row in &self.rows {
+            length += row.len();
+        }
+        length
+    }
+
+    fn get(&self) -> String {
+        return self.rows.join("\n");
+    }
+
+    #[allow(clippy::similar_names)]
+    fn insert(&mut self, row: usize, pos: usize, ch: char) {
+        if row >= self.rows.len() {
+            self.rows.resize(row + 1, String::new());
+        }
+        self.rows[row].insert(pos, ch);
+    }
+
+    fn insert_row(&mut self, row: usize, content: String) {
+        self.rows.insert(row, content);
+    }
+
+    fn remove(&mut self, row: usize, pos: usize) {
+        if row < self.rows.len() {
+            self.rows[row].remove(pos);
+        }
     }
 }
 
