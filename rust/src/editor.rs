@@ -1,5 +1,5 @@
 #[cfg(target_os = "none")]
-use alloc::{string::{String, ToString}, format};
+use alloc::{string::{String, ToString}, format, vec::Vec};
 
 use crate::{list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_WHITE, Color565, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}, time}};
 
@@ -13,8 +13,13 @@ struct BWColor {
 
 #[derive(Default)]
 struct TextCursor {
+    row: usize,
     pos: usize,
     color: BWColor
+}
+
+struct TextContent {
+    lines: Vec<String>
 }
 
 pub struct TextEditor {
