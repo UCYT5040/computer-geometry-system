@@ -1,5 +1,7 @@
+use core::ops::Range;
+
 #[cfg(target_os = "none")]
-use alloc::{string::String, string, format, vec::Vec};
+use alloc::{string::String, format, vec::Vec};
 
 use crate::{list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_WHITE, Color565, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}, time}};
 
@@ -82,10 +84,20 @@ impl TextEditor {
                     }
                 },
                 Key::Left => {
-                    self.cursor.pos = self.cursor.pos.saturating_sub(1);
+                    if self.cursor.pos > 0 {
+                        self.cursor.pos = self.cursor.pos.saturating_sub(1);
+                    } else {
+                        self.cursor.row = self.cursor.row.saturating_sub(1);
+                        self.cursor.pos = self.content.row_len(self.cursor.row);
+                    }
                 },
                 Key::Right => {
-                    self.cursor.pos = (self.cursor.pos + 1).min(self.content.row_len(self.cursor.row));
+                    if self.cursor.pos < self.content.row_len(self.cursor.row) {
+                        self.cursor.pos += 1;
+                    } else if self.content.row_exists(self.cursor.row + 1) {
+                        self.cursor.row += 1;
+                        self.cursor.pos = 0;
+                    }
                 },
                 Key::Up => {
                     self.cursor.row = self.cursor.row.saturating_sub(1);
@@ -99,7 +111,13 @@ impl TextEditor {
                     }
                 }
                 Key::Ans => {
-                    self.content.insert_row(self.cursor.row + 1, String::new());
+                    let row_len = self.content.row_len(self.cursor.row);
+                    let new_content = if self.cursor.pos < row_len {
+                        self.content.drain_from_row(self.cursor.row, self.cursor.pos..row_len)
+                    } else {
+                        String::new()
+                    };
+                    self.content.insert_row(self.cursor.row + 1, new_content);
                     self.cursor.row += 1;
                     self.cursor.pos = 0;
                 }
@@ -208,13 +226,18 @@ impl TextContent {
     }
 
     fn get_row_depth(&self, row: usize, pos: usize) -> usize {
-        let mut rows: Vec<String> = self.rows.clone();
-        rows.drain(..row);
         let depth: usize = self.rows[..row].iter()
-            .flat_map(|s| s.lines())
-            .flat_map(|s| s.as_bytes().chunks(ROW_LENGTH).map(|c| String::from_utf8(c.to_vec()).unwrap()))
-            .count();
+            .map(|s| if s.is_empty() { 1 } else { (s.len() + ROW_LENGTH - 1) / ROW_LENGTH })
+            .sum();
         depth + pos / ROW_LENGTH
+    }
+
+    fn drain_from_row(&mut self, row: usize, range: Range<usize>) -> String {
+        if row < self.rows.len() {
+            self.rows[row].drain(range).collect()
+        } else {
+            String::new()
+        }
     }
 }
 
