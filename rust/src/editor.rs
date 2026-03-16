@@ -41,6 +41,7 @@ impl TextEditor {
         self.clear_screen();
         self.render_button_states();
         self.render_top_bar();
+        self.render_bottom_bar();
         self.render_cursor(COLOR_WHITE);
         loop {
             input_man.scan();
@@ -126,6 +127,7 @@ impl TextEditor {
         }
         self.render_content();
         self.render_top_bar();
+        self.render_bottom_bar();
         self.render_cursor(COLOR_WHITE);
         self.time = 0;
     }
@@ -155,6 +157,12 @@ impl TextEditor {
         let chars_str_x = SCREEN_WIDTH.saturating_sub((chars_str.len() * 7 - 2).try_into().unwrap()) - 7;
         push_rect_uniform(ScreenRect::new(chars_str_x.saturating_sub(20), 0, SCREEN_WIDTH - chars_str_x + 20, 14), COLOR_BLACK);
         draw_string(chars_str.as_str(), ScreenPoint::new(chars_str_x, 0), false, COLOR_WHITE, COLOR_BLACK);
+    }
+
+    fn render_bottom_bar(&self) {
+        push_rect_uniform(ScreenRect::new(0, SCREEN_HEIGHT - 15, SCREEN_WIDTH, 15), COLOR_BLACK);
+        push_rect_uniform(ScreenRect::new(0, SCREEN_HEIGHT - 15, SCREEN_WIDTH, 1), COLOR_WHITE);
+        draw_string("   Ans: New Line      Exe: Execute Program", ScreenPoint::new(5, SCREEN_HEIGHT - 14), false, COLOR_WHITE, COLOR_BLACK);
     }
 
     fn render_button_states(&self) {
