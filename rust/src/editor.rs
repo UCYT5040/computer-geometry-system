@@ -3,7 +3,7 @@ use core::ops::Range;
 #[cfg(target_os = "none")]
 use alloc::{string::String, format, vec::Vec};
 
-use crate::{list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_WHITE, Color565, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}, time}};
+use crate::{ui::list::{SCREEN_HEIGHT, SCREEN_WIDTH}, nadk::{display::{COLOR_BLACK, COLOR_WHITE, Color565, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key}, time}};
 
 const ROW_LENGTH: usize = 45;
 const ROW_HEIGHT: usize = 15;
