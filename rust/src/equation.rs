@@ -6,6 +6,10 @@ use alloc::{collections::btree_set::BTreeSet, string::String};
 #[cfg(not(target_os = "none"))]
 use std::collections::BTreeSet;
 
+pub trait IntoEquation {
+    fn into_equation(&self) -> Option<Equation>;
+}
+
 #[derive(Clone)]
 pub struct Equation {
     pub data: Expr

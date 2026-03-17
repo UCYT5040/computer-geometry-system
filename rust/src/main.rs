@@ -62,7 +62,7 @@ fn main() {
 
     // this is here for testing purposes
     let mut textinput = TextEditor::new();
-    let content = textinput.start(&mut input_man);
+    let _content = textinput.start(&mut input_man);
 
     loop {
         input_man.scan();

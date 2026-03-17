@@ -5,8 +5,9 @@ use alloc::{string::String, vec::Vec};
 
 use indextree::{Arena, NodeId};
 
-use crate::equation::Equation;
+use crate::equation::{Equation, IntoEquation};
 
+#[derive(PartialEq)]
 pub enum ItemType {
     Category,
     Equation,
@@ -90,5 +91,20 @@ impl TreeItem {
 impl ItemData {
     pub fn get_equation(&self) -> Option<Equation> {
         return self.data_equation.clone();
+    }
+}
+
+impl IntoEquation for TreeItem {
+    fn into_equation(&self) -> Option<Equation> {
+        if self.item_type == ItemType::Equation 
+        { return self.data.get_equation() }
+        else 
+        { None }
+    }
+}
+
+impl IntoEquation for String {
+    fn into_equation(&self) -> Option<Equation> {
+        Equation::new(&self).ok()
     }
 }
