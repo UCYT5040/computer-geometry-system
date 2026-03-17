@@ -32,7 +32,8 @@ impl Equation {
     }
 }
 
-pub fn solve_equation(data: &impl IntoEquation, mut input_man: &mut InputManager) {
+pub fn solve_equation(data: &impl IntoEquation, mut input_man: &mut InputManager) -> String {
+    let mut res= "Error".to_string();
     if let Some(equation) = data.into_equation() {
         let mut vars = equation.get_variables();
         // remove automatically set consts
@@ -49,7 +50,6 @@ pub fn solve_equation(data: &impl IntoEquation, mut input_man: &mut InputManager
                 expr = engine.substitute(&expr, var, &res).unwrap_or(expr);
             }
 
-            let res: String;
             match MathCore::solve(expr.to_string().as_str(), &out) {
                 Ok(r) => {
                     if r.is_empty() {
@@ -68,12 +68,7 @@ pub fn solve_equation(data: &impl IntoEquation, mut input_man: &mut InputManager
                     res = e.to_string();
                 }
             }
-
-            push_rect_uniform(ScreenRect::new(15, 200, SCREEN_WIDTH - 15, 15), COLOR_BLACK);
-            draw_string(res.as_str(), ScreenPoint::new(15, 200), false, COLOR_WHITE, COLOR_BLACK);
-            time::wait_milliseconds(500);
-            wait_until_pressed_multiple(vec![Key::Ok, Key::Back]);
-            input_man.scan();
         }
     }
+    return res;
 }

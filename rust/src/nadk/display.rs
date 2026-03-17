@@ -140,6 +140,23 @@ pub fn push_rect_uniform(rect: ScreenRect, color: Color565) {
     }
 }
 
+/// Fill the screen rect defined by `rect` with the given color and a border.
+pub fn push_rect_uniform_bordered(rect: ScreenRect, fill: Color565, border: Color565) {
+    let fill_rect = ScreenRect { x: rect.x + 1, y: rect.y + 1, width: rect.width.saturating_sub(2), height: rect.height.saturating_sub(2) };
+
+    #[cfg(feature = "epsilon")]
+    unsafe {
+        eadk_display_push_rect_uniform(rect, border);
+        eadk_display_push_rect_uniform(fill_rect, fill);
+    }
+
+    #[cfg(feature = "upsilon")]
+    unsafe {
+        extapp_pushRectUniform(rect.x, rect.y, rect.width, rect.height, border);
+        extapp_pushRectUniform(fill_rect.x, fill_rect.y, fill_rect.width, fill_rect.height, fill);
+    }
+}
+
 /// Wait until the screen is ed. The maximum FPS is 40 on actual hardware.
 pub fn wait_for_vblank() {
     #[cfg(feature = "epsilon")]
