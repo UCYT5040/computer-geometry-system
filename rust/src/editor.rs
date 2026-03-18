@@ -39,6 +39,7 @@ impl TextEditor {
 
     pub fn start(&mut self, input_man: &mut InputManager) -> String {
         self.clear_screen();
+        self.render_content();
         self.render_button_states();
         self.render_top_bar();
         self.render_bottom_bar();
@@ -68,9 +69,9 @@ impl TextEditor {
     }
 
     fn handle_keypress(&mut self, key: Key) {
-        if let Some(c) = key.get_matching_char(self.shift_pressed, self.alpha_pressed) {
+        if let Some(c) = key.get_matching_str(self.shift_pressed, self.alpha_pressed) {
             self.content.insert(self.cursor.row, self.cursor.pos, c);
-            self.cursor.pos += 1;
+            self.cursor.pos += c.len();
         } else {
             match key {
                 Key::Backspace => {
@@ -206,11 +207,11 @@ impl TextContent {
         return self.rows.join("\n");
     }
 
-    fn insert(&mut self, row: usize, pos: usize, ch: char) {
+    fn insert(&mut self, row: usize, pos: usize, s: &str) {
         if row >= self.rows.len() {
             self.rows.resize(row + 1, String::new());
         }
-        self.rows[row].insert(pos, ch);
+        self.rows[row].insert_str(pos, s);
     }
 
     fn insert_row(&mut self, row: usize, content: String) {
