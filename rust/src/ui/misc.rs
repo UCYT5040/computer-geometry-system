@@ -1,11 +1,11 @@
 #[cfg(target_os = "none")]
-use alloc::{collections::btree_set::BTreeSet, format, string::String, vec, vec::Vec};
+use alloc::{collections::btree_set::BTreeSet, format, string::{String, ToString}, vec};
 use mathcore_nostd::{Expr, MathCore};
 
 #[cfg(not(target_os = "none"))]
 use std::collections::BTreeSet;
 
-use crate::{editor::ROW_HEIGHT, nadk::{display::{COLOR_BLACK, COLOR_WHITE, ScreenPoint, ScreenRect, draw_string, pull_rect, push_rect, push_rect_uniform, push_rect_uniform_bordered}, keyboard::{InputManager, Key, wait_until_pressed_multiple}, time}, ui::list::{SCREEN_HEIGHT, SCREEN_WIDTH, StringList}};
+use crate::{editor::ROW_HEIGHT, nadk::{display::{COLOR_BLACK, COLOR_RED, COLOR_WHITE, ScreenPoint, ScreenRect, draw_string, pull_rect, push_rect, push_rect_uniform_bordered}, keyboard::{InputManager, Key, wait_until_pressed, wait_until_pressed_multiple}, time}, ui::list::{SCREEN_HEIGHT, SCREEN_WIDTH, StringList}};
 
 pub fn select_var(vars: &BTreeSet<String>, input_man: &mut InputManager) -> Option<String> {
     if vars.is_empty() { return None; }
@@ -34,6 +34,7 @@ pub fn select_var(vars: &BTreeSet<String>, input_man: &mut InputManager) -> Opti
 
 pub fn input_number_for(var: &str, input_man: &mut InputManager, math: &MathCore) -> Expr {
     let mut text_arr: [String; 4] = [format!("Input variable for {}:", var), String::new(), String::new(), String::new()];
+    show_text_box(&text_arr);
     loop {
         input_man.scan();
         if let Some(last_pressed) = input_man.get_last_pressed() {
@@ -43,24 +44,23 @@ pub fn input_number_for(var: &str, input_man: &mut InputManager, math: &MathCore
                 },
                 None => {
                     match last_pressed {
-                        Key::Backspace => { res.pop(); },
+                        Key::Backspace => { text_arr[1].pop(); },
                         Key::Ok => break,
                         _ => {}
                     }
                 }
             }
+            show_text_box(&text_arr);
         }
         time::wait_milliseconds(20);
     }
-    let resm = math.evaluate(&res);
+    let resm = math.evaluate(&text_arr[1]);
     match resm {
         Ok(expr) => {
             return expr;
         }
         Err(e) => {
-            // TODO: Error popup
-            push_rect_uniform(ScreenRect::new(15, 200, SCREEN_WIDTH - 15, 15), COLOR_BLACK);
-            draw_string(format!("{}", e).as_str(), ScreenPoint::new(15, 200), false, COLOR_WHITE, COLOR_BLACK);
+            show_alert(e.to_string());
             return input_number_for(var, input_man, math);
         }
     }
@@ -77,4 +77,17 @@ pub fn show_text_box(lines: &[String]) {
     for (i, line) in lines.iter().enumerate() {
         draw_string(&line, ScreenPoint::new(55, 55 + (i * ROW_HEIGHT) as u16), false, COLOR_WHITE, COLOR_BLACK);
     }
+}
+
+pub fn show_alert(content: String) {
+    let alert_rect = ScreenRect::new(80, 80, SCREEN_WIDTH - 160, SCREEN_HEIGHT - 160);
+
+    let saved_rect = pull_rect(alert_rect);
+    push_rect_uniform_bordered(alert_rect, COLOR_BLACK, COLOR_RED);
+    draw_string(&content, ScreenPoint::new(alert_rect.x + 5, alert_rect.y + 5), false, COLOR_WHITE, COLOR_BLACK);
+    draw_string("Press Exe to dismiss", ScreenPoint::new(alert_rect.x + 20, alert_rect.y + 20), false, COLOR_WHITE, COLOR_BLACK);
+    time::wait_milliseconds(500);
+    wait_until_pressed(Key::Exe);
+
+    push_rect(alert_rect, &saved_rect);
 }
