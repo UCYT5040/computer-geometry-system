@@ -10,7 +10,7 @@ use crate::{editor::ROW_HEIGHT, nadk::{display::{COLOR_BLACK, COLOR_RED, COLOR_W
 pub fn select_var(vars: &BTreeSet<String>, input_man: &mut InputManager) -> Option<String> {
     if vars.is_empty() { return None; }
     show_text_box(&["Select desired output:".to_string()]);
-    let mut list = StringList::new_with_width(55 + 15, 55, SCREEN_WIDTH - 110, 4);
+    let mut list = StringList::new_with_width(55, 55 + 15, SCREEN_WIDTH - 110, 4);
     for var in vars {
         list.add(var);
     }
