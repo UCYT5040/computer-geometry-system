@@ -33,7 +33,7 @@ pub fn select_var(vars: &BTreeSet<String>, input_man: &mut InputManager) -> Opti
 }
 
 pub fn input_number_for(var: &str, input_man: &mut InputManager, math: &MathCore) -> Expr {
-    let mut text_arr: [String; 4] = [format!("Input variable for {}:", var), String::new(), String::new(), String::new()];
+    let mut text_arr: [String; 2] = [format!("Input variable for {}:", var), String::new()];
     show_text_box(&text_arr);
     loop {
         input_man.scan();
