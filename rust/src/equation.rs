@@ -6,7 +6,7 @@ use alloc::{collections::btree_set::BTreeSet, string::{String, ToString}, format
 #[cfg(not(target_os = "none"))]
 use std::collections::BTreeSet;
 
-use crate::{nadk::{display::{COLOR_BLACK, COLOR_WHITE, ScreenPoint, ScreenRect, draw_string, push_rect_uniform}, keyboard::{InputManager, Key, wait_until_pressed_multiple}, time}, ui::{list::SCREEN_WIDTH, misc::{input_number_for, select_var}}};
+use crate::{nadk::keyboard::{InputManager}, ui::{misc::{input_number_for, select_var}}};
 
 pub trait IntoEquation {
     fn into_equation(&self) -> Option<Equation>;

@@ -13,20 +13,15 @@ mod editor;
 use crate::editor::TextEditor;
 use crate::equation::solve_equation;
 use crate::ui::list::StringList;
-use crate::tree::{EquationTree, ItemType};
+use crate::tree::EquationTree;
 use crate::ui::misc::show_result;
-
-#[cfg(target_os = "none")]
-use alloc::format;
 
 use indextree::NodeId;
 
-use crate::data::add_sample_data;
 use crate::nadk::display::{
-    COLOR_BLACK, COLOR_WHITE, Color565, SCREEN_RECT, ScreenPoint, draw_string, push_rect_uniform
+    Color565, SCREEN_RECT, push_rect_uniform
 };
-use crate::nadk::keyboard::{InputManager, Key};
-use crate::nadk::time;
+use crate::nadk::keyboard::InputManager;
 use crate::nadk::utils::wait_ok_released;
 
 // The app name must be a C string and the app name size must include the end line NULL character
