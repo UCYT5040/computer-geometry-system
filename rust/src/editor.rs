@@ -78,7 +78,7 @@ impl TextEditor {
                     if self.cursor.pos > 0 {
                         self.content.remove(self.cursor.row, self.cursor.pos - 1);
                         self.cursor.pos -= 1;
-                    } else {
+                    } else if !self.content.row_empty(self.cursor.row) {
                         let old_row = self.content.remove_row(self.cursor.row);
                         self.cursor.row = self.cursor.row.saturating_sub(1);
                         self.cursor.pos = self.content.row_len(self.cursor.row);
@@ -207,6 +207,10 @@ impl TextContent {
         return self.rows.join("\n");
     }
 
+    fn row_empty(&self, row: usize) -> bool {
+        self.rows.get(row).and_then(|r| Some(r.is_empty())).unwrap_or(true)
+    }
+
     fn insert(&mut self, row: usize, pos: usize, s: &str) {
         if row >= self.rows.len() {
             self.rows.resize(row + 1, String::new());
@@ -225,7 +229,7 @@ impl TextContent {
     }
 
     fn remove(&mut self, row: usize, pos: usize) {
-        if row < self.rows.len() {
+        if row < self.rows.len() && !self.rows[row].is_empty() {
             self.rows[row].remove(pos);
         }
     }
