@@ -14,6 +14,7 @@ use crate::editor::TextEditor;
 use crate::equation::solve_equation;
 use crate::ui::list::StringList;
 use crate::tree::{EquationTree, ItemType};
+use crate::ui::misc::show_result;
 
 #[cfg(target_os = "none")]
 use alloc::format;
@@ -40,7 +41,7 @@ fn main() {
     wait_ok_released();
 
     push_rect_uniform(SCREEN_RECT, Color565::from_rgb888(0, 0, 0));
-    draw_string(
+    /*draw_string(
         format!("Computer Geometry System v{}", env!("CARGO_PKG_VERSION")).as_str(),
         ScreenPoint::new(15, 15),
         false,
@@ -52,15 +53,21 @@ fn main() {
     add_sample_data(&mut tree);
 
     let mut menu_list = StringList::new_with_max_row_count(15, 40);
-    let mut input_man = InputManager::new();
-
+    
     let mut current_node = tree.root;
-    change_node(&mut menu_list, &mut tree, current_node);
+    change_node(&mut menu_list, &mut tree, current_node);*/
+
+    let mut input_man = InputManager::new();
 
     // this is here for testing purposes
     let mut textinput = TextEditor::new();
-    let _content = textinput.start(&mut input_man);
+    loop {
+        let input = textinput.start(&mut input_man);
+        let res = solve_equation(&input, &mut input_man);
+        show_result(res);
+    }
 
+    /*
     loop {
         input_man.scan();
         if input_man.is_just_pressed(Key::Down) {
@@ -100,7 +107,7 @@ fn main() {
             break;
         }
         time::wait_milliseconds(50);
-    }
+    }*/
 }
 
 fn change_node(menu_list: &mut StringList, tree: &mut EquationTree, node: NodeId) {

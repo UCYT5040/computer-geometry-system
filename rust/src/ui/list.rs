@@ -28,6 +28,7 @@ pub struct StringList {
     rows: u16,
     x: u16,
     y: u16,
+    width: Option<u16>
 }
 
 impl StringList {
@@ -39,7 +40,12 @@ impl StringList {
             x,
             y,
             rows,
+            width: None
         }
+    }
+
+    pub fn new_with_width(x: u16, y: u16, width: u16, rows: u16) -> Self {
+        StringList { items: Vec::new(), position: 0, rows, x, y, width: Some(width) }
     }
 
     /// Creates a new string list with the maximum number of rows
@@ -51,6 +57,7 @@ impl StringList {
             x,
             y,
             rows: max_rows,
+            width: None
         }
     }
 
@@ -160,7 +167,7 @@ impl StringList {
             ScreenRect::new(
                 self.x,
                 self.y,
-                SCREEN_WIDTH - self.x,
+                self.width.unwrap_or(SCREEN_WIDTH - self.x),
                 self.rows * ROW_HEIGHT,
             ),
             COLOR_BLACK,
