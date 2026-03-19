@@ -1,11 +1,11 @@
 #[cfg(target_os = "none")]
-use alloc::{collections::btree_set::BTreeSet, format, string::{String, ToString}, vec};
+use alloc::{collections::btree_set::BTreeSet, format, string::{String, ToString}, vec, vec::Vec};
 use mathcore_nostd::{Expr, MathCore};
 
 #[cfg(not(target_os = "none"))]
 use std::collections::BTreeSet;
 
-use crate::{editor::ROW_HEIGHT, nadk::{display::{COLOR_BLACK, COLOR_RED, COLOR_WHITE, ScreenPoint, ScreenRect, draw_string, pull_rect, push_rect, push_rect_uniform_bordered}, keyboard::{InputManager, Key, wait_until_pressed, wait_until_pressed_multiple}, time}, ui::list::{SCREEN_HEIGHT, SCREEN_WIDTH, StringList}};
+use crate::{editor::ROW_HEIGHT, nadk::{display::{COLOR_BLACK, COLOR_GREEN, COLOR_RED, COLOR_WHITE, Color565, ScreenPoint, ScreenRect, draw_string, pull_rect, push_rect, push_rect_uniform_bordered}, keyboard::{InputManager, Key, wait_until_pressed, wait_until_pressed_multiple}, time}, ui::list::{SCREEN_HEIGHT, SCREEN_WIDTH, StringList}};
 
 pub fn select_var(vars: &BTreeSet<String>, input_man: &mut InputManager) -> Option<String> {
     if vars.is_empty() { return None; }
@@ -66,13 +66,20 @@ pub fn input_number_for(var: &str, input_man: &mut InputManager, math: &MathCore
 }
 
 pub fn show_result(res: String) {
-    show_text_box(&[res]);
+    show_text_box_colored(res.lines().map(String::from).collect::<Vec<String>>().as_slice(), COLOR_BLACK, if res.contains("Error") { COLOR_RED } else { COLOR_GREEN });
     time::wait_milliseconds(500);
     wait_until_pressed_multiple(vec![Key::Ok, Key::Back, Key::Exe]);
 }
 
 pub fn show_text_box(lines: &[String]) {
     push_rect_uniform_bordered(ScreenRect::new(50, 50, SCREEN_WIDTH - 100, SCREEN_HEIGHT - 100), COLOR_BLACK, COLOR_WHITE);
+    for (i, line) in lines.iter().enumerate() {
+        draw_string(&line, ScreenPoint::new(55, 55 + (i * ROW_HEIGHT) as u16), false, COLOR_WHITE, COLOR_BLACK);
+    }
+}
+
+pub fn show_text_box_colored(lines: &[String], fill: Color565, border: Color565) {
+    push_rect_uniform_bordered(ScreenRect::new(50, 50, SCREEN_WIDTH - 100, SCREEN_HEIGHT - 100), fill, border);
     for (i, line) in lines.iter().enumerate() {
         draw_string(&line, ScreenPoint::new(55, 55 + (i * ROW_HEIGHT) as u16), false, COLOR_WHITE, COLOR_BLACK);
     }

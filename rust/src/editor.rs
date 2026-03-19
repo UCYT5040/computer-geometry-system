@@ -48,7 +48,7 @@ impl TextEditor {
             input_man.scan();
             if input_man.is_just_pressed(Key::Shift) { self.shift_pressed = !self.shift_pressed; self.render_button_states(); }
             if input_man.is_just_pressed(Key::Alpha) { self.alpha_pressed = !self.alpha_pressed; self.render_button_states(); }
-            if input_man.is_just_pressed(Key::Back) || input_man.is_just_pressed(Key::Exe) { break; }
+            if input_man.is_just_pressed(Key::Back) || input_man.is_just_pressed(Key::Exe) { self.render_cursor(COLOR_BLACK); break; }
             if let Some(key) = input_man.get_last_pressed() {
                 self.handle_keypress(key);
             }

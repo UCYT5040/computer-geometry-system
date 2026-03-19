@@ -34,7 +34,7 @@ impl Equation {
 }
 
 pub fn solve_equation(data: &impl IntoEquation, input_man: &mut InputManager) -> String {
-    let mut res = "Error".to_string();
+    let mut res;
     if let Some(equation) = data.into_equation() {
         let math = MathCore::new();
 
@@ -45,11 +45,10 @@ pub fn solve_equation(data: &impl IntoEquation, input_man: &mut InputManager) ->
         vars.remove("tau");
 
         let solve_res;
-        let prefix;
 
         if vars.is_empty() {
             solve_res = math.evaluate(&equation.data.to_string()).and_then(|r| Ok(vec![r]));
-            prefix = String::new();
+            res = String::new();
         } else {
             let selres = select_var(&vars, input_man);
             if selres.is_none() { return "Failed to prompt user to select variable".to_string(); }
@@ -64,27 +63,25 @@ pub fn solve_equation(data: &impl IntoEquation, input_man: &mut InputManager) ->
             }
 
             solve_res = MathCore::solve(expr.to_string().as_str(), &selres);
-            prefix = format!("{} = ", selres);
+            res = format!("{} =\n", selres);
         }
 
         match solve_res {
             Ok(r) => {
                 if r.is_empty() {
                     res = "No results".to_string();
-                } else if r.len() == 1 {
-                    if let Expr::Number(n) = r[0] {
-                        res = format!("{}{:.10}", prefix, n)
-                    } else {
-                        res = format!("{}{}", prefix, r[0])
-                    }
                 } else {
-                    res = format!("{}{:?}", prefix, r);
+                    for (i, one_res) in r.iter().enumerate() {
+                        res.push_str(&format!("{:?}{}", one_res, if i < r.len() - 1 { "\n" } else { "" }));
+                    }
                 }
             },
             Err(e) => {
                 res = e.to_string();
             }
         }
+    } else {
+        res = "Error parsing expression".to_string();
     }
     res
 }
