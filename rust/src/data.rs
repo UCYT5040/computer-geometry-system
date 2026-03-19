@@ -1,5 +1,6 @@
 use crate::tree::{EquationTree, TreeItem};
 
+#[allow(unused)]
 pub fn add_sample_data(tree: &mut EquationTree) {
     let circle_id = tree.add_child(tree.root, TreeItem::new_category_with_name("Circle"));
     let polygon_id = tree.add_child(tree.root, TreeItem::new_category_with_name("Polygon"));

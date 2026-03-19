@@ -105,10 +105,11 @@ fn main() {
     }*/
 }
 
+#[allow(unused)]
 fn change_node(menu_list: &mut StringList, tree: &mut EquationTree, node: NodeId) {
     let items = tree.get_children(node);
     menu_list.clear();
     let _ = menu_list.select(0);
-    menu_list.add_tree_items(&tree, items);
+    menu_list.add_tree_items(tree, items);
     menu_list.render();
 }

@@ -56,11 +56,11 @@ pub fn input_number_for(var: &str, input_man: &mut InputManager, math: &MathCore
     let resm = math.evaluate(&text_arr[1]);
     match resm {
         Ok(expr) => {
-            return expr;
+            expr
         }
         Err(e) => {
             show_alert(e.to_string());
-            return input_number_for(var, input_man, math);
+            input_number_for(var, input_man, math)
         }
     }
 }
@@ -68,7 +68,7 @@ pub fn input_number_for(var: &str, input_man: &mut InputManager, math: &MathCore
 pub fn show_result(res: String) {
     show_text_box(&[res]);
     time::wait_milliseconds(500);
-    wait_until_pressed_multiple(vec![Key::Ok, Key::Back]);
+    wait_until_pressed_multiple(vec![Key::Ok, Key::Back, Key::Exe]);
 }
 
 pub fn show_text_box(lines: &[String]) {

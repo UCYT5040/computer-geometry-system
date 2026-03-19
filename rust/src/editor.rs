@@ -34,7 +34,7 @@ pub struct TextEditor {
 
 impl TextEditor {
     pub fn new() -> Self {
-        return TextEditor { content: TextContent::new(), shift_pressed: false, alpha_pressed: false, time: 0, cursor: TextCursor::default() }
+        TextEditor { content: TextContent::new(), shift_pressed: false, alpha_pressed: false, time: 0, cursor: TextCursor::default() }
     }
 
     pub fn start(&mut self, input_man: &mut InputManager) -> String {
@@ -59,7 +59,7 @@ impl TextEditor {
                 self.render_cursor(cursor_color);
             }
         }
-        return self.content.get();
+        self.content.get()
     }
 
     fn render_cursor(&self, color: Color565) {
@@ -204,7 +204,7 @@ impl TextContent {
     }
 
     fn get(&self) -> String {
-        return self.rows.join("\n");
+        self.rows.join("\n")
     }
 
     fn row_empty(&self, row: usize) -> bool {

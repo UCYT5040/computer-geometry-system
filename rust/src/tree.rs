@@ -50,7 +50,7 @@ impl EquationTree {
     }
 
     pub fn get_children(&mut self, parent: NodeId) -> Vec<NodeId> {
-        parent.children(&mut self.arena).collect()
+        parent.children(&self.arena).collect()
     }
 
     pub fn get_data(&self, node: NodeId) -> Option<&TreeItem> {
@@ -78,8 +78,7 @@ impl TreeItem {
     }
 
     pub fn new_equation_with_name(name: impl Into<String>, equation: &str) -> Self {
-        let mut data = ItemData::default();
-        data.data_equation = Equation::new(equation).ok();
+        let mut data = ItemData { data_equation: Equation::new(equation).ok(), ..Default::default() };
         TreeItem {
             name: name.into(),
             item_type: ItemType::Equation,
@@ -90,14 +89,14 @@ impl TreeItem {
 
 impl ItemData {
     pub fn get_equation(&self) -> Option<Equation> {
-        return self.data_equation.clone();
+        self.data_equation.clone()
     }
 }
 
 impl IntoEquation for TreeItem {
     fn into_equation(&self) -> Option<Equation> {
         if self.item_type == ItemType::Equation 
-        { return self.data.get_equation() }
+        { self.data.get_equation() }
         else 
         { None }
     }
@@ -105,6 +104,6 @@ impl IntoEquation for TreeItem {
 
 impl IntoEquation for String {
     fn into_equation(&self) -> Option<Equation> {
-        Equation::new(&self).ok()
+        Equation::new(self).ok()
     }
 }
