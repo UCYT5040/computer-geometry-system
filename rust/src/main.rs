@@ -54,7 +54,6 @@ fn main() {
 
     let mut input_man = InputManager::new();
 
-    // this is here for testing purposes
     let mut textinput = TextEditor::new();
     loop {
         let input = textinput.start(&mut input_man);

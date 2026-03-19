@@ -38,7 +38,7 @@ check:
     @echo All checks passed!
 
 check-ra:
-    cargo check --release --bin {{app_name}} --target=thumbv7em-none-eabihf --features "epsilon" --no-default-features --message-format=json
+    cargo clippy --release --bin {{app_name}} --target=thumbv7em-none-eabihf --features "epsilon" --no-default-features --message-format=json
 
 [macos]
 run_nwb:
