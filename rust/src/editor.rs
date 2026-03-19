@@ -196,7 +196,7 @@ impl TextContent {
     }
 
     fn row_len(&self, row: usize) -> usize {
-        self.rows.get(row).and_then(|r| Some(r.len())).unwrap_or(0)
+        self.rows.get(row).map(|r| r.len()).unwrap_or(0)
     }
 
     fn row_exists(&self, row: usize) -> bool {
@@ -208,7 +208,7 @@ impl TextContent {
     }
 
     fn row_empty(&self, row: usize) -> bool {
-        self.rows.get(row).and_then(|r| Some(r.is_empty())).unwrap_or(true)
+        self.rows.get(row).map(|r| r.is_empty()).unwrap_or(true)
     }
 
     fn insert(&mut self, row: usize, pos: usize, s: &str) {
@@ -240,7 +240,7 @@ impl TextContent {
 
     fn get_row_depth(&self, row: usize, pos: usize) -> usize {
         let depth: usize = self.rows[..row].iter()
-            .map(|s| if s.is_empty() { 1 } else { (s.len() + ROW_LENGTH - 1) / ROW_LENGTH })
+            .map(|s| if s.is_empty() { 1 } else { s.len().div_ceil(ROW_LENGTH) })
             .sum();
         depth + pos / ROW_LENGTH
     }

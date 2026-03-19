@@ -47,7 +47,7 @@ pub fn solve_equation(data: &impl IntoEquation, input_man: &mut InputManager) ->
         let solve_res;
 
         if vars.is_empty() {
-            solve_res = math.evaluate(&equation.data.to_string()).and_then(|r| Ok(vec![r]));
+            solve_res = math.evaluate(&equation.data.to_string()).map(|r| vec![r]);
             res = String::new();
         } else {
             let selres = select_var(&vars, input_man);

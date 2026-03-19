@@ -83,24 +83,24 @@ pub fn file_read_slice(filename: &str, start: usize, mut slice_lenght: usize) ->
     #[cfg(target_os = "none")]
     {
         let c_string = ffi::CString::new(filename).unwrap();
-        let mut lenght: usize = 0;
+        let mut length: usize = 0;
 
         #[cfg(feature = "epsilon")]
         let array_pointer = unsafe {
-            extapp_fileRead(c_string.as_ptr(), &mut lenght as *mut usize).offset(start as isize)
+            extapp_fileRead(c_string.as_ptr(), &mut length as *mut usize).add(start)
         };
 
         #[cfg(feature = "upsilon")]
         let array_pointer = unsafe {
-            extapp_fileRead(c_string.as_ptr(), &mut lenght as *mut usize, 0).offset(start as isize)
+            extapp_fileRead(c_string.as_ptr(), &mut length as *mut usize, 0).offset(start as isize)
         };
 
         if array_pointer.is_null() {
             return None;
         }
 
-        if lenght < slice_lenght {
-            slice_lenght = lenght;
+        if length < slice_lenght {
+            slice_lenght = length;
         }
 
         Some(unsafe { core::slice::from_raw_parts(array_pointer, slice_lenght).to_vec() })

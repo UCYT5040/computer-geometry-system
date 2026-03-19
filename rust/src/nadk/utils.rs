@@ -12,10 +12,10 @@ pub fn wait_ok_released() {
 
 /// Write debugging code to the screen.
 pub fn log(text: &[&str]) {
-    for i in 0..text.len() {
+    for (i, content) in text.iter().enumerate() {
         display::draw_string(
-            text[i],
-            display::ScreenPoint::new(5, 5 + 14 * i as u16 as u16),
+            content,
+            display::ScreenPoint::new(5, 5 + 14 * i as u16),
             false,
             display::Color565::from_rgb888(255, 255, 255),
             display::Color565::from_rgb888(0, 0, 0),

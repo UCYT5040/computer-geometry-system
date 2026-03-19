@@ -287,7 +287,7 @@ impl Key {
 }
 
 /// Represent the state of the keyboard when `scan()` is called.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct KeyboardState(u64);
 
 impl KeyboardState {
@@ -317,12 +317,6 @@ impl KeyboardState {
     /// Return true if the given key was just released. If the key is still released in `self` and `old`, this function returns false.
     pub fn get_just_released(&self, old: KeyboardState) -> Self {
         KeyboardState((!self.0) & old.0)
-    }
-}
-
-impl Default for KeyboardState {
-    fn default() -> Self {
-        KeyboardState(0)
     }
 }
 
@@ -358,12 +352,7 @@ impl InputManager {
 
     /// Return one of the currently pressed keys.
     pub fn get_last_pressed(&self) -> Option<Key> {
-        for k in enum_iterator::all::<Key>() {
-            if self.is_just_pressed(k) {
-                return Some(k);
-            }
-        }
-        None
+        enum_iterator::all::<Key>().find(|&k| self.is_just_pressed(k))
     }
 
     /// Return true if the given key has just been pressed.

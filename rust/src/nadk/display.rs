@@ -4,6 +4,9 @@ calc_use!(alloc::vec::Vec);
 #[cfg(not(target_os = "none"))]
 use std::ffi::CString;
 
+#[cfg(target_os = "none")]
+use alloc::vec;
+
 use core::ffi::c_char;
 
 pub const SCREEN_RECT: ScreenRect = ScreenRect {
@@ -104,10 +107,7 @@ pub fn push_rect(rect: ScreenRect, pixels: &[Color565]) {
 /// Fetch pixels from the given rect from the screen. The size of the returned vector will be `rect.width * rect.height`
 pub fn pull_rect(rect: ScreenRect) -> Vec<Color565> {
     let size = rect.width as usize * rect.height as usize;
-    let mut vec: Vec<Color565> = Vec::with_capacity(size);
-    for _ in 0..size {
-        vec.push(COLOR_BLACK);
-    }
+    let mut vec: Vec<Color565> = vec![COLOR_BLACK;size];
 
     #[cfg(feature = "epsilon")]
     unsafe {
