@@ -245,6 +245,9 @@ impl Key {
                 Key::Pi => Some("="),
                 Key::Sqrt => Some("<"),
                 Key::Power => Some(">"),
+                Key::Tangent => Some("atan("),
+                Key::Cosine => Some("acos("),
+                Key::Sine => Some("asin("),
                 _ => None,
             }
         } else {

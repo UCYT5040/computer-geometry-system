@@ -216,9 +216,9 @@ checksum = "9afa463f5405ee81cdb9cc2baf37e08ec7e4c8209442b5d72c04cfb2cd6e6286"
 
 [[package]]
 name = "mathcore_nostd"
-version = "0.3.2"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d79e0d833f66b26c7aeea81e51c6463f6622f4011ef8e993d774f8da085f7d0"
+checksum = "bdfe4b8690bd68ba6885650759deb055b85157787f2ddb61c7d5cf3296f69b47"
 dependencies = [
  "getrandom",
  "indexmap",
