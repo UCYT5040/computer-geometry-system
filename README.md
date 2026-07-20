@@ -52,3 +52,7 @@ See `rust/justfile`: `just build-epsilon`, `just build-upsilon`, `just send-epsi
 ## Known Issues
 
 - Solving some equations may not yield all possible results.
+
+## AI Declaration
+
+I don't think I really used AI to help develop this.
